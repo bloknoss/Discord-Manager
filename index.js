@@ -5,12 +5,13 @@ const app = express();
 const port = 3000;
 //const tokens = ["MTE3MDgyNTEyNjQwNTczNDQyMA.GD3HDp.FjLUcntQdqNg-53b_rfKwjv9JSVYb7yz1yjU6Q"];
 
+console.log("test1");
 const logs = require("./logs.json");
 const intents = [
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildBans,
-    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuilssssdMessages,
     GatewayIntentBits.MessageContent,
 ];
 
@@ -127,7 +128,7 @@ app.get("/logs", (req, res) => {
 
             messages.push(stringJSON);
         });
-        res.send("<pre>"+messages+"</pre>");
+        res.send("<pre>" + messages + "</pre>");
     })();
 });
 
