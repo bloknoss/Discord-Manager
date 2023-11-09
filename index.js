@@ -1,19 +1,31 @@
 const express = require("express");
-const mysql = require("mysql");
 const { Client, GatewayIntentBits } = require("discord.js");
+
 const app = express();
 const port = 3000;
-//const tokens = ["MTE3MDgyNTEyNjQwNTczNDQyMA.GD3HDp.FjLUcntQdqNg-53b_rfKwjv9JSVYb7yz1yjU6Q"];
 
-console.log("test1");
-const logs = require("./logs.json");
+const tokens = executeQuery("select bot_token from bots where bot_run is false");
+
 const intents = [
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildBans,
-    GatewayIntentBits.GuilssssdMessages,
+    GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
 ];
+
+async function executeQuery(query) {
+    const mysql = require("mysql2/promise");
+    const conn = await mysql.createConnection({
+        host: "localhost",
+        user: "root",
+        password: "",
+        database: "Discord",
+    });
+    let [rows, fields] = await conn.execute(query);
+    conn.end();
+    return rows;
+}
 
 function insertLog(message_id, message_content, message_date, user_id, user_name, guild_id, guild_name, channel_id, channel_name) {
     const sql = `
@@ -30,13 +42,7 @@ function insertLog(message_id, message_content, message_date, user_id, user_name
     ) VALUES ("${message_id}", "${message_content}", ${message_date}, "${user_id}", "${user_name}", "${guild_id}", "${guild_name}", "${channel_id}", "${channel_name}")
   `;
 
-    conn.query(sql, (error, results) => {
-        if (error) {
-            console.error("Error inserting data:", error);
-        } else {
-            console.log("Data inserted successfully:", results);
-        }
-    });
+    executeQuery(sql);
 }
 
 function insertBot(bot_token, bot_name, bot_avatar, bot_prefix, bot_status, bot_auto, bot_run, user_id) {
@@ -63,20 +69,6 @@ function insertBot(bot_token, bot_name, bot_avatar, bot_prefix, bot_status, bot_
     });
 }
 
-var conn = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "Discord",
-});
-
-conn.connect((err) => {
-    if (err) throw err;
-    console.log("Connected to DB successfully.");
-});
-
-const tokens = executeQuery("select bot_token from bots where bot_run is false");
-
 async function startBots() {
     (async () => {
         await tokens.then(async (results) => {
@@ -95,17 +87,24 @@ async function startBots() {
                     console.log(`Logged in as ${client.user.tag}!`);
                 });
 
-                client.on("messageCreate", (message) => {
-                    let message_id = message.id;
-                    let message_content = message.content;
-                    let message_date = message.createdTimestamp;
-                    let user_id = message.author.id;
-                    let user = message.author.username;
-                    let guild_id = message.guild.id;
-                    let guild_name = message.guild.name;
-                    let channel_id = message.channel.id;
-                    let channel_name = message.channel.name;
-                    insertLog(message_id, message_content, message_date, user_id, user, guild_id, guild_name, channel_id, channel_name);
+                client.on("messageCreate", async (message) => {
+                    bot_info.then((data) => {
+                        let prefix = data[0]["bot_prexix"];
+                        let message_id = message.id;
+                        let message_content = message.content;
+                        let message_date = message.createdTimestamp;
+                        let user_id = message.author.id;
+                        let user = message.author.username;
+                        let guild_id = message.guild.id;
+                        let guild_name = message.guild.name;
+                        let channel_id = message.channel.id;
+                        let channel_name = message.channel.name;
+                        insertLog(message_id, message_content, message_date, user_id, user, guild_id, guild_name, channel_id, channel_name);
+
+                        if (message_content.startsWith(prefix)) {
+                            console.log("test");
+                        }
+                    });
                 });
 
                 client.login(token);
@@ -124,7 +123,6 @@ app.get("/logs", (req, res) => {
         let messages = [];
         await info.then(async (results) => {
             let stringJSON = JSON.stringify(results, null, 4);
-            let pureJSON = JSON.parse(stringJSON);
 
             messages.push(stringJSON);
         });
@@ -135,19 +133,6 @@ app.get("/logs", (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
-
-async function executeQuery(query) {
-    const mysql = require("mysql2/promise");
-    const conn = await mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "",
-        database: "Discord",
-    });
-    let [rows, fields] = await conn.execute(query);
-    conn.end();
-    return rows;
-}
 
 let printTokens = async () => {
     await getTokens.then(async (results) => {
