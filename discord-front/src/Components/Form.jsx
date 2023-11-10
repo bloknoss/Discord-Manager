@@ -16,7 +16,7 @@ function AddForm() {
 
     const sendFormData = async () => {
         console.log(formData);
-        fetch("http://0.0.0.0:3001/api/form-data", {
+        fetch("https://7198-2a0c-5a80-3606-bb00-6ee2-8fb5-ff3-ecdf.ngrok-free.app/api/form-data", {
             method: "POST",
             headers: {
                 Accept: "application/json",
