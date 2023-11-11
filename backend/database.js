@@ -40,21 +40,13 @@ function insertBot(bot_token, bot_name, bot_avatar, bot_prefix, bot_status, bot_
       bot_auto,
       bot_run,
       user_id
-    ) VALUES (${bot_token}, ${bot_name}, ${bot_avatar}, ${bot_prefix}, ${bot_status}, ${bot_auto}, ${bot_run}, ${user_id})
+    ) VALUES ("${bot_token}", "${bot_name}", "${bot_avatar}", "${bot_prefix}", "${bot_status}", ${bot_auto}, ${bot_run}, "${user_id}")
   `;
-
-    const values = [bot_token, bot_name, bot_avatar, bot_prefix, bot_status, bot_auto, bot_run, user_id];
-    conn.query(sql, values, (error, results) => {
-        if (error) {
-            console.error("Error inserting data:", error);
-        } else {
-            console.log("Data inserted successfully:", results);
-        }
-    });
+    executeQuery(sql);
 }
 
 module.exports = {
     executeQuery,
     insertBot,
-    insertLog
-}
+    insertLog,
+};

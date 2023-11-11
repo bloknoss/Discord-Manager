@@ -18,9 +18,9 @@ async function initializeDiscordConnection() {
             let mapped = new Map(Object.entries(pureJSON));
 
             mapped.forEach((value, key) => {
-                const TOKEN = value;
+                const token = value;
 
-                const bot_info = executeQuery(`select * from bots where bot_token = "${TOKEN}"`);
+                const bot_info = executeQuery(`select * from bots where bot_token = "${token}"`);
                 const client = new Client({ intents: intents });
 
                 client.on("ready", () => {
@@ -52,7 +52,7 @@ async function initializeDiscordConnection() {
                     });
                 });
 
-                client.login(TOKEN);
+                client.login(token);
             });
         });
     })();
